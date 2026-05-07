@@ -1,0 +1,19 @@
+Delivered-To: user@company.com
+Received: by 2002:a05:6870:a1b2:0:0:0:0 with SMTP id c67csp9876543ghi;
+        Sun, 2 Mar 2026 10:45:12 -0800 (PST)
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com. [209.85.161.178])
+        by mx.google.com with SMTPS id ghi012.345.2026.03.02.10.45.11;
+        Sun, 02 Mar 2026 10:45:11 -0800 (PST)
+Authentication-Results: mx.google.com;
+       spf=pass smtp.mailfrom=friend@gmail.com;
+       dkim=pass header.d=gmail.com;
+       dmarc=pass header.from=gmail.com
+From: "John Smith" <friend@gmail.com>
+To: user@company.com
+Subject: Check out these vacation photos!
+Date: Sun, 2 Mar 2026 18:45:08 +0000
+Message-ID: <CABx+abc123@mail.gmail.com>
+X-Mailer: Apple Mail (2.3774)
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=_Part_345678"
+Return-Path: <friend@gmail.com>

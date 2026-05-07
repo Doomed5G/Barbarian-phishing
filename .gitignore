@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / Editor
+.claude/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project temp files
+_plan_output.txt
+*.log
+*.tmp
+
+# Generated reports
+analysis_report_*

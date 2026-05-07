@@ -1,0 +1,47 @@
+Delivered-To: victim@company.com
+Received: by 2002:a05:6870:d3e4:0:0:0:0 with SMTP id f89csp1111111jkl;
+        Mon, 3 Mar 2026 03:22:45 -0800 (PST)
+Received: from mail-proxy.example.net (unknown [45.33.128.99])
+        by mx.google.com with SMTP id jkl345.678.2026.03.03.03.22.44;
+        Mon, 03 Mar 2026 03:22:44 -0800 (PST)
+Received: from darkweb-relay1.onion.example.net (unknown [10.0.0.1])
+        by mail-proxy.example.net with SMTP;
+        Mon, 03 Mar 2026 03:22:40 -0800 (PST)
+Received: from another-relay.example.org (unknown [172.16.0.5])
+        by darkweb-relay1.onion.example.net with SMTP;
+        Mon, 03 Mar 2026 03:22:35 -0800 (PST)
+Received: from yet-another-hop.suspicious.xyz (unknown [192.0.2.100])
+        by another-relay.example.org with SMTP;
+        Mon, 03 Mar 2026 03:22:30 -0800 (PST)
+Received: from origin-server.malware-c2.example.top (unknown [203.0.113.50])
+        by yet-another-hop.suspicious.xyz with SMTP;
+        Mon, 03 Mar 2026 03:22:25 -0800 (PST)
+Received: from final-hop1.test.example (unknown [198.51.100.1])
+        by mx2.test.example with SMTP;
+        Mon, 03 Mar 2026 03:22:20 -0800 (PST)
+Received: from final-hop2.test.example (unknown [198.51.100.2])
+        by final-hop1.test.example with SMTP;
+        Mon, 03 Mar 2026 03:22:15 -0800 (PST)
+Received: from final-hop3.test.example (unknown [198.51.100.3])
+        by final-hop2.test.example with SMTP;
+        Mon, 03 Mar 2026 03:22:10 -0800 (PST)
+Received: from final-hop4.test.example (unknown [198.51.100.4])
+        by final-hop3.test.example with SMTP;
+        Mon, 03 Mar 2026 03:22:05 -0800 (PST)
+Received: from final-hop5.test.example (unknown [198.51.100.5])
+        by final-hop4.test.example with SMTP;
+        Mon, 03 Mar 2026 03:22:00 -0800 (PST)
+Authentication-Results: mx.google.com;
+       spf=fail smtp.mailfrom=it-support@company.com;
+       dkim=fail header.d=company.com;
+       dmarc=fail (p=REJECT) header.from=company.com
+From: "IT Support" <it-support@company.com>
+Reply-To: helpdesk@malicious-domain.xyz
+To: victim@company.com
+Subject: Critical Security Update Required
+Date: Mon, 3 Mar 2026 11:22:18 +0000
+Message-ID: <random-id-456@darkweb-relay1.onion.example.net>
+X-Mailer: PHPMailer 6.8.1
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=_Part_999888"
+Return-Path: <bounce@malicious-domain.xyz>

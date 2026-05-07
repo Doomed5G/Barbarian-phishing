@@ -1,0 +1,2 @@
+Click here to download: https://malware-download.example.net/document-update.exe
+Also visit https://secondary-c2-server.example.com/callback

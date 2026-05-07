@@ -1,0 +1,23 @@
+Delivered-To: analyst@company.com
+Received: by 2002:a05:6870:b1a5:0:0:0:0 with SMTP id a37csp1234567abc;
+        Mon, 3 Mar 2026 08:15:23 -0800 (PST)
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id abc123.456.2026.03.03.08.15.22;
+        Mon, 03 Mar 2026 08:15:22 -0800 (PST)
+Received: from suspicious-relay.example.ru (unknown [185.234.72.11])
+        by mail-sor-f41.google.com with SMTP id xyz789;
+        Mon, 03 Mar 2026 08:15:20 -0800 (PST)
+Authentication-Results: mx.google.com;
+       spf=fail (google.com: domain of sender@legitimate-bank.com does not designate 185.234.72.11 as permitted sender) smtp.mailfrom=sender@legitimate-bank.com;
+       dkim=fail header.d=legitimate-bank.com;
+       dmarc=fail (p=REJECT) header.from=legitimate-bank.com
+From: "Security Team" <security@legitimate-bank.com>
+Reply-To: urgent-reply@suspicious-domain.tk
+To: analyst@company.com
+Subject: Urgent: Your account has been compromised
+Date: Mon, 3 Mar 2026 16:15:18 +0000
+Message-ID: <fake-msg-id-123@suspicious-relay.example.ru>
+X-Mailer: PHPMailer 6.5.0
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=_Part_123456"
+Return-Path: <bounce@suspicious-domain.tk>

