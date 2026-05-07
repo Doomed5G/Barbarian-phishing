@@ -6,27 +6,120 @@ Additionaly, social engineering detection is not intigrated...
 
 ---
 
-## Quick start
+## How to run it
+
+### 1. Install
 
 ```bash
 git clone https://github.com/Doomed5G/Barbarian-phishing.git
 cd Barbarian-phishing
 pip install -r requirements.txt
+```
+
+That installs everything the analyzers need: `pikepdf` (PDF), `oletools` + `olefile` + `msoffcrypto-tool` (Office/RTF/encrypted), `defusedxml` (safe XML), `puremagic` (magic-byte file ID), `Pillow` (image forensics).
+
+### 2. Lay out your input
+
+The script analyzes a **root folder** that contains one subfolder per email. You pick one of two layouts for that subfolder:
+
+> **Why this exact layout?** This tool is paired with another script (the upstream one that ingests your mailboxes / queues and prepares samples for analysis). That upstream script writes its output in this exact shape, and Barbarian Phishing is wired to consume it directly. If you want to feed it a different shape, see [Customizing the input shape](#customizing-the-input-shape) below.
+
+#### Normal mode (one folder per email, headers + body + attachments as separate files)
+
+```
+emails_to_analyze/                 <-- this is the path you pass on the CLI
+├── email_001/
+│   ├── attached_files/
+│   │   ├── headers.txt            <-- raw email headers, one per file
+│   │   ├── invoice.pdf            <-- any attachments alongside
+│   │   └── document.docx
+│   ├── body.html                  <-- preferred, used by body link analyzer
+│   └── body.txt                   <-- fallback if no body.html
+├── email_002/
+│   └── attached_files/
+│       └── ...
+└── link.txt                       <-- optional, root-level (see below)
+```
+
+- `attached_files/headers.txt` is the dump of the email's RFC 5322 headers. The header analyzer reads it directly.
+- `body.html` is preferred over `body.txt`; the body link analyzer wants HTML so it can compare display text to actual hrefs.
+- Attachment filenames don't matter, only their extensions. The router in `analyze_file` dispatches by extension.
+
+#### EML mode (one `.eml` file per email)
+
+```
+emails_to_analyze/
+├── email_001/
+│   └── message.eml                <-- name doesn't matter; first .eml in the folder wins
+├── email_002/
+│   └── case_2024_001.eml
+└── link.txt                       <-- optional, root-level
+```
+
+In EML mode the script unpacks each `.eml` itself: it parses headers, picks the HTML body (falls back to plain text), extracts every attachment to a fresh `attached_files/` subdir under the email folder, and pulls URLs from the body into a per-email `link.txt`. From that point onward analysis is identical to Normal mode.
+
+#### `link.txt` (optional, both modes)
+
+A plain-text file with one URL per line. Two scopes:
+
+- `emails_to_analyze/link.txt` (root) shared list of URLs to enrich with `domain_intel` for *every* email in the run.
+- `emails_to_analyze/email_001/link.txt` (per-email) URLs scoped to that email only. EML mode writes this automatically from the body's hrefs.
+
+### 3. Run the analyzer
+
+```bash
 python barbarian-phishing.py path/to/emails_to_analyze
 ```
 
-You'll be asked to choose a mode:
+You'll be prompted at startup:
 
-- **Normal mode** each email folder contains an `attached_files/` directory with a `headers.txt` plus the attachments, and a `body.html` (or `body.txt`) at the email-folder root.
-- **EML mode** each email folder contains a `.eml` file; the script parses headers, body, and attachments from it directly.
+```
+  Select analysis mode:
+  [1] Normal mode - headers in attached_files/, body.html in email folder
+  [2] EML mode   - parse .eml file to extract headers, body, and attachments
 
-Reports land next to the input directory.
+  Enter choice (1 or 2):
+```
+
+Pick the layout you used. The mode applies to the **whole run** — you can't mix Normal and EML email folders in one input root.
+
+### 4. Find the results
+
+Two files land **inside the input root** (next to the email folders), timestamped so consecutive runs don't overwrite each other:
+
+```
+emails_to_analyze/
+├── analysis_report_YYYYMMDD_HHMMSS.html     <-- open in browser
+├── analysis_report_YYYYMMDD_HHMMSS.json     <-- machine-readable
+├── email_001/...
+└── email_002/...
+```
+
+- The **HTML** is the interactive triage dashboard described in [Reports](#reports). Single self-contained file dark theme by default, filter pills, search box, collapsible per-attachment rows, in-report tool & code legend.
+- The **JSON** is the same data structured for downstream consumption (SIEM, SOAR, scripts).
+
+The console output also gives you a one-line summary per email and the total counts at the end.
+
+### Customizing the input shape
+
+If the upstream script that feeds you ever changes its layout, or you want to plug Barbarian Phishing into a different pipeline, these are the four hooks to edit. All live in [barbarian-phishing.py](barbarian-phishing.py).
+
+| Hook | Lines (approx.) | What it controls |
+|---|---|---|
+| `analyze` (entry point) | top of `AttachmentAnalyzer` | how the root folder is iterated and which subfolders it considers email folders. |
+| `analyze_email_folder` | line 871 | per-email Normal-mode contract: where to find `attached_files/`, `headers.txt`, `body.html`, `link.txt`. |
+| `_find_eml_file` + `_parse_eml` | lines 1000 + 1007 | EML-mode contract: what counts as the `.eml` (first match by extension), how attachments and the body are pulled out, and where they are written. |
+| `analyze_file` | line 774 | per-file routing by extension to the PDF / Office / image / archive / script analyzers. Add new extensions or redirect existing ones here. |
+
+For example, if your upstream pairs each email with a sidecar `meta.json` and you want to surface its fields in the report, the simplest place is `analyze_email_folder` read the JSON, attach it to the per-email report dict, and the HTML/JSON renderers already serialize unknown keys.
+
+If you want to drop the interactive prompt and run unattended, the prompt lives in `__main__` (bottom of the file, around line 1768). Replace it with an arg parser or hard-code `mode='eml'` / `mode='normal'`.
 
 ---
 
 ## What's inside
 
-The analysis stack is fully native Python no subprocess shells to external scripts, no `.py` files imported from PATH. Every analyzer is a normal class importable from [tools/custom/](tools/custom/).
+The analysis stack is fully native Python: no subprocess shells to external scripts, no `.py` files imported from PATH. Every analyzer is a normal class importable from [tools/custom/](tools/custom/).
 
 | Module | What it does |
 |---|---|
@@ -102,19 +195,19 @@ The analysis stack is fully native Python no subprocess shells to external scrip
 
 Two files are written next to the input directory: `analysis_report_YYYYMMDD_HHMMSS.html` and `.json`.
 
-### HTML report interactive triage dashboard
+### HTML report (interactive triage dashboard)
 
 Single self-contained file (no external assets). Dark theme by default.
 
 - **Hero + tiles** at the top: counts of malicious / suspicious / clean / no-verdict attachments
 - **Sticky toolbar**: filter pills (All / Malicious / Suspicious / Clean / No verdict), free-text search across filename + code + message, Expand all / Collapse all
-- **One row per attachment**, grouped by email and sorted worst-first. Each row collapsed by default click to drill in.
+- **One row per attachment**, grouped by email and sorted worst-first. Each row is collapsed by default; click to drill in.
 - **Inside a row**: findings (each with severity chip, friendly title, and a "What does this mean?" sub-collapsible explaining what + why), extracted IOCs, recommendations, file hashes, analysis tools used, statistics
-- **Per-email subsections** (header / body link / domain intel) are also collapsed by default they don't dominate the page
+- **Per-email subsections** (header / body link / domain intel) are also collapsed by default, so they don't dominate the page
 - **🌙 / ☀ theme toggle** in the header, persists in localStorage
 - **📖 Tool & code legend** at the bottom (also collapsed): explains every analyzer and lists every finding code grouped by family with plain-English **What** and **Why it matters** columns
 
-### JSON report machine-readable
+### JSON report (machine-readable)
 
 Each attachment's analysis dict carries the standard fields (`file`, `type`, `timestamp`, `hashes`, `findings`, `tools_used`) plus the new structured output:
 
@@ -147,25 +240,6 @@ Each attachment's analysis dict carries the standard fields (`file`, `type`, `ti
 
 ---
 
-## Folder structure expected
-
-```
-emails_to_analyze/
-├── email_001/
-│   ├── attached_files/
-│   │   ├── headers.txt          # Normal mode
-│   │   ├── invoice.pdf
-│   │   └── document.docx
-│   └── body.html                # Normal mode (or body.txt)
-├── email_002/
-│   └── message.eml              # EML mode
-└── link.txt                     # Optional extra URLs to feed to domain_intel
-```
-
-The script asks you which mode at launch. You can mix pick Normal or EML for the whole run.
-
----
-
 ## Testing
 
 ```bash
@@ -173,16 +247,16 @@ pip install -r requirements-dev.txt
 python -m pytest tests/ -v
 ```
 
-The suite covers IOC extraction, the scoring engine, the PDF analyzer (against the [test_pdfs/](test_pdfs/) fixtures), and the Office analyzer (against synthetic OOXML zips assembled in-memory no malware-corpus files committed). 45 tests at time of writing, all green on Windows / Python 3.13–3.14 with `pikepdf` and `oletools` installed.
+The suite covers IOC extraction, the scoring engine, EML parsing, the PDF analyzer (against the [test_pdfs/](test_pdfs/) fixtures), and the Office analyzer (against synthetic OOXML zips assembled in-memory; no malware-corpus files committed). 47 tests at time of writing, all green on Windows / Python 3.13–3.14 with `pikepdf` and `oletools` installed.
 
 ---
 
 ## Architecture notes
 
-- All previous Didier Stevens / oletools subprocess scripts (`pdf-parser.py`, `oledump.py`, `oleid.py`, `olevba.py`) have been removed. The same algorithms run in-process via `pikepdf` and `oletools` as proper Python libraries faster, structured output, no PATH-lookup or stdout-scraping.
+- All previous Didier Stevens / oletools subprocess scripts (`pdf-parser.py`, `oledump.py`, `oleid.py`, `olevba.py`) have been removed. The same algorithms run in-process via `pikepdf` and `oletools` as proper Python libraries: faster, structured output, no PATH-lookup or stdout-scraping.
 - The optional `XLMMacroDeobfuscator` package, if installed, will be used automatically for Excel 4.0 deobfuscation. Without it, XLM presence is still flagged, just not deobfuscated.
 - Image forensics requires `Pillow` (in `requirements.txt`); without it, EXIF/ELA/steganography checks degrade gracefully and emit a setup warning.
-- Optional `puremagic` (in `requirements.txt`) provides magic-byte file-type validation `python-magic` is **not** used, since on Windows it requires shipping `libmagic.dll`.
+- Optional `puremagic` (in `requirements.txt`) provides magic-byte file-type validation; `python-magic` is **not** used, since on Windows it requires shipping `libmagic.dll`.
 
 ---
 
