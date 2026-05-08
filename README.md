@@ -1,6 +1,6 @@
 # Barbarian Phishing
 
-Automated security analysis tool for email attachments designed for cybersecurity analysts. Analyzes PDFs, Office documents, and images for malicious content using industry-standard tools.
+Automated security analysis tool for email attachments designed for cybersecurity analysts. Analyzes PDFs, Office documents, headers, domains and images for malicious content using industry-standard tools.
 Please use with Caution, this tool will NOT detect everything that is used out there in the wild. 
 Additionaly, social engineering detection is not intigrated...
 
