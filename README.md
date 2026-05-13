@@ -251,15 +251,6 @@ The suite covers IOC extraction, the scoring engine, EML parsing, the PDF analyz
 
 ---
 
-## Architecture notes
-
-- All previous Didier Stevens / oletools subprocess scripts (`pdf-parser.py`, `oledump.py`, `oleid.py`, `olevba.py`) have been removed. The same algorithms run in-process via `pikepdf` and `oletools` as proper Python libraries: faster, structured output, no PATH-lookup or stdout-scraping.
-- The optional `XLMMacroDeobfuscator` package, if installed, will be used automatically for Excel 4.0 deobfuscation. Without it, XLM presence is still flagged, just not deobfuscated.
-- Image forensics requires `Pillow` (in `requirements.txt`); without it, EXIF/ELA/steganography checks degrade gracefully and emit a setup warning.
-- Optional `puremagic` (in `requirements.txt`) provides magic-byte file-type validation; `python-magic` is **not** used, since on Windows it requires shipping `libmagic.dll`.
-
----
-
 ## Limitations
 
 - Cannot detect zero-day exploits or novel obfuscation that no rule fires on.
@@ -274,14 +265,6 @@ The suite covers IOC extraction, the scoring engine, EML parsing, the PDF analyz
 - Update `oletools` / `pikepdf` regularly both ship rule and parser improvements.
 - Manual review remains required for any `malicious` verdict before action.
 
-## Contributing
-
-Useful directions:
-- Additional finding rules + entries in [tools/custom/code_catalog.py](tools/custom/code_catalog.py).
-- VirusTotal / threat-intel API enrichment in `domain_intel`.
-- YARA-rule integration over decoded JS / VBA / RTF payloads.
-- OneNote (`.one`) full parsing currently only embedded-PE byte scan.
-- More test fixtures in [test_pdfs/](test_pdfs/) and a `test_office/` corpus.
 
 ## License
 
