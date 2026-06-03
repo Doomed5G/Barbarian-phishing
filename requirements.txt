@@ -15,3 +15,13 @@ puremagic>=1.20
 
 # Image forensics
 Pillow>=9.0
+numpy>=1.21          # ELA + LSB-steganography statistical analysis
+
+# Archive / script / executable / HTML / LNK attachment analysis
+pefile>=2023.2.7     # PE header inspection for executables and embedded payloads
+beautifulsoup4>=4.9  # HTML attachment + body link parsing (imported as bs4)
+LnkParse3>=1.4.0     # .lnk shortcut parsing
+
+# Domain intelligence (live network lookups, best-effort)
+dnspython>=2.3       # DNS record checks (imported as dns)
+python-whois>=0.9    # WHOIS domain-age checks (imported as whois)

@@ -13,10 +13,22 @@ Additionaly, social engineering detection is not intigrated...
 ```bash
 git clone https://github.com/Doomed5G/Barbarian-phishing.git
 cd Barbarian-phishing
-pip install -r requirements.txt
+
+# Windows
+py -3.13 -m pip install -r requirements.txt
+
+# Linux / macOS
+python3 -m pip install -r requirements.txt
 ```
 
 That installs everything the analyzers need: `pikepdf` (PDF), `oletools` + `olefile` + `msoffcrypto-tool` (Office/RTF/encrypted), `defusedxml` (safe XML), `puremagic` (magic-byte file ID), `Pillow` (image forensics).
+
+> **Windows: use `py -3.13`, not the Microsoft Store `python3`.** The Store's `python3`
+> is a *separate* interpreter with its own empty `site-packages`. If you install with one
+> interpreter and run with another, the report will claim packages like `pikepdf` or
+> `puremagic` are "not installed" even though they are. Use `py -3.13` (or `py -3`) for
+> both install **and** run so they hit the same interpreter. Check with
+> `py -3.13 -m pip show pikepdf`.
 
 ### 2. Lay out your input
 
@@ -68,7 +80,11 @@ A plain-text file with one URL per line. Two scopes:
 ### 3. Run the analyzer
 
 ```bash
-python barbarian-phishing.py path/to/emails_to_analyze
+# Windows
+py -3.13 barbarian-phishing.py path\to\emails_to_analyze
+
+# Linux / macOS
+python3 barbarian-phishing.py path/to/emails_to_analyze
 ```
 
 You'll be prompted at startup:
@@ -243,8 +259,13 @@ Each attachment's analysis dict carries the standard fields (`file`, `type`, `ti
 ## Testing
 
 ```bash
-pip install -r requirements-dev.txt
-python -m pytest tests/ -v
+# Windows
+py -3.13 -m pip install -r requirements-dev.txt
+py -3.13 -m pytest tests/ -v
+
+# Linux / macOS
+python3 -m pip install -r requirements-dev.txt
+python3 -m pytest tests/ -v
 ```
 
 The suite covers IOC extraction, the scoring engine, EML parsing, the PDF analyzer (against the [test_pdfs/](test_pdfs/) fixtures), and the Office analyzer (against synthetic OOXML zips assembled in-memory; no malware-corpus files committed). 47 tests at time of writing, all green on Windows / Python 3.13–3.14 with `pikepdf` and `oletools` installed.
